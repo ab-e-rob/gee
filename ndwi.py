@@ -3,6 +3,7 @@ import os
 import ee
 from utils import get_aoi
 from dotenv import load_dotenv
+import geetools
 
 # Initialize Earth Engine
 ee.Initialize()
@@ -10,39 +11,38 @@ ee.Initialize()
 # Load environment variables
 load_dotenv()
 
-# Get the Area of Interest (AOI)
-bbox = get_aoi.get_area_of_interest(os.getenv('AOI'))
+def export_ndwi(area_name):
+    roi = get_aoi.get_area_of_interest(area_name)
 
-# Import the MODIS NDWI dataset
-sentinel2 = ee.ImageCollection("COPERNICUS/S2_HARMONIZED") \
-    .filterDate(os.getenv('START_DATE'), os.getenv('END_DATE')) \
-    .filterBounds(bbox) \
-    .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', int(os.getenv('CLOUD_PERCENTAGE'))))
+    def clip_image(image):
+        return image.clip(roi)
 
-def calculate_ndwi(image):
-    ndwi = image.normalizedDifference(['B3', 'B8'])  # NIR and Red bands
-    return ndwi
+    def create_ndwi(image):
+        ndwi = image.normalizedDifference(['B3', 'B8']).rename('NDWI')
 
-# Map the function over the image collection and calculate the median
-ndwi_collection = sentinel2.map(calculate_ndwi)
-ndwi_median = ndwi_collection.median()
+        return image
 
-# Clip NDWI to the AOI
-ndwi_clip = ndwi_median.clip(bbox)
+    collection = ee.ImageCollection('COPERNICUS/S2')\
+        .filterDate(os.getenv('START_DATE'), os.getenv('END_DATE'))\
+        .filterBounds(roi)\
+        .filter(ee.Filter.lte('CLOUDY_PIXEL_PERCENTAGE', int(os.getenv('CLOUD_PERCENTAGE'))))\
+        .map(clip_image)\
+        .map(create_ndwi)
 
-# Set the output directory on Google Drive
-output_dir = 'ndwi_export'
+    print('NDWI collection size:', collection.size().getInfo())
 
-# Define the export parameters
-export_params = {
-    'image': ndwi_clip,
-    'description': 'NDWI_Export',
-    'folder': output_dir,
-    'scale': 10,  # Adjust the scale as needed
-    'region': bbox.bounds().getInfo()['coordinates'],
-    'fileFormat': 'GeoTIFF',
-}
+    # batch export to Google Drive
+    geetools.batch.Export.imagecollection.toDrive(
+        collection,
+        f'export_{area_name}_ndwi',
+        namePattern='{id}',
+        scale=10,
+        dataType="float",
+        region=roi,
+        crs='EPSG:4326',
+        datePattern=None,
+        extra=None,
+        verbose=False
+    )
 
-# Start the export task
-task = ee.batch.Export.image.toDrive(**export_params)
-task.start()
+export_ndwi(os.getenv('AOI'))

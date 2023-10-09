@@ -1,5 +1,7 @@
 import ee
 
+ee.Initialize()
+
 def get_area_of_interest(area_name):
 
     areas_of_interest = {
@@ -17,3 +19,5 @@ def get_area_of_interest(area_name):
     }
 
     return areas_of_interest[area_name]
+
+print(get_area_of_interest('laidaure'))
