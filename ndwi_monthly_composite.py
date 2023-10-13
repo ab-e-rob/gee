@@ -58,9 +58,9 @@ for month in range(1, 13):
     # Export the water mask to Google Drive for the current month.
     exportWaterMask = waterMaskClipped.unmask(0).byte()  # Convert to byte type
     task = ee.batch.Export.image.toDrive(exportWaterMask,
-        description='water_mask_month_' + str(month),  # Name for the exported file
+        description='water_mask_month_' + str(month) + '_' + os.getenv('AOI'),  # Name for the exported file
         scale=10,
-        folder='test_ndwi_mask',
+        folder='ndwi_mask_' + os.getenv('AOI'),
         region=roi.getInfo()['coordinates'],
         maxPixels=1e10
     )
