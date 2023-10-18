@@ -1,21 +1,12 @@
 import os
 import ee
 from dotenv import load_dotenv
+from utils import get_aoi
 
 # Initialize Earth Engine
 ee.Initialize()
 
-def get_all_aois():
-    areas_of_interest = {
-        'Aloppkolen': ee.Geometry.Polygon(
-            [[[13.341786637743756, 62.53755260005313], [13.933978734379824, 62.53755260005313],
-              [13.933978734379824, 62.734579034629085], [13.341786637743756, 62.734579034629085]]]),
-        'Annsjon': ee.Geometry.Polygon(
-            [[[12.312011822989799, 63.19214557992773], [12.740564668477983, 63.19214557992773],
-              [12.740564668477983, 63.34273125171799], [12.312011822989799, 63.34273125171799]]])}
-    return areas_of_interest
-
-aoi_list = get_all_aois()
+aoi_list = get_aoi.get_all_aois()
 
 # Define the years for which you want to obtain composites.
 startYear = 2020
@@ -67,7 +58,7 @@ for aoi_name, roi in aoi_list.items():  # Iterate through dictionary items.
             # Export the water mask to Google Drive for the current month and year.
             exportWaterMask = waterMaskClipped.unmask(0).byte()  # Convert to byte type
             task = ee.batch.Export.image.toDrive(exportWaterMask,
-                description='water_mask_year_' + str(year) + '_month_' + str(month) + '_' + aoi_name,  # Name for the exported file
+                description= aoi_name + '_' + str(year) + '_' + str(month),  # Name for the exported file
                 scale=10,
                 folder='ndwi_mask_' + aoi_name,  # Use the AOI name for the folder
                 region=roi.getInfo()['coordinates'],
