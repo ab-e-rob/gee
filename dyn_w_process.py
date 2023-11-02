@@ -4,7 +4,7 @@ from shapely.geometry import shape, MultiPolygon
 import geopandas as gpd
 import csv
 
-wetland_name = 'Askoviken'
+wetland_name = 'Lundakrabukten'
 
 # Folder containing the input raster files
 input_folder = r'D:\dynamic_world\dynamic_world_' + wetland_name
@@ -52,7 +52,7 @@ for filename in os.listdir(input_folder):
         area_utm = dissolved_gdf.geometry.area.iloc[0]
 
         # Test save as shapefile
-        dissolved_gdf.to_file(f'{filename}.shp')
+        #dissolved_gdf.to_file(f'test_shps\{filename}.shp')
 
         # Optionally, you can print the area for each raster
         print(f"{filename} Area (UTM): {area_utm} m²")

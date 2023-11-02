@@ -1,12 +1,13 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
 
 wetland_name = 'Askoviken'
 
 # Locate csv file and load as a dataframe
 dynamic_world = r'C:\Users\abro3569\PycharmProjects\gee\dyn_w_area\\' + wetland_name + '.csv'
 ndwi = r'C:\Users\abro3569\PycharmProjects\gee\ndwi_area\\' + wetland_name + '.csv'
-deep_aqua = r'C:\Users\abro3569\PycharmProjects\deep-wetlands-new\data\results\big-2020_' + wetland_name + '_water_estimates.csv'
+deep_aqua = r'C:\Users\abro3569\PycharmProjects\deep-wetlands-new\data\results\big-2020_' + wetland_name + '_water_estimates_NEW_POLYGONISED.csv'
 
 def read_dynamic_world():
     global dw_df
@@ -64,35 +65,45 @@ def read_ndwi():
     ndwi_df['Date'] = pd.to_datetime(ndwi_df['Date'], format='%m/%Y')
 
     # Display the DataFrame
-    print(ndwi_df)
+    #print(ndwi_df)
 
     return
 
 def read_deepaqua():
     global da_df
+    global new_da_df
 
     da_df = pd.read_csv(deep_aqua, delimiter=',', header=0)
 
-    # Extract the area and date and give them new names
-    new_names = ['Area (metres squared)', 'Date']
-    da_df = da_df.iloc[:, [2, 3]]
-    da_df.columns = new_names
+    # Convert the 'Date' column to a datetime object with the correct format
+    da_df['Date'] = pd.to_datetime(da_df['Date'], format='%Y-%m-%d %H:%M:%S')
 
-    # Add name column
-    da_df['Name'] = wetland_name
+    # Extract the month and year information from the 'Date' column
+    da_df['Year'] = da_df['Date'].dt.year
+    da_df['Month'] = da_df['Date'].dt.month
 
-    # Rearrange the old columns
-    da_df = da_df[['Name', 'Date', 'Area (metres squared)']]
+    # Group by 'Year' and 'Month', and calculate the mean of 'Area' for each group
+    da_df = da_df.groupby(['Year', 'Month', 'Name'])['Area (metres squared)'].mean().reset_index()
 
-    print(da_df)
+    # Create a new DataFrame with columns 'Name', 'Date', and 'Area'
+    new_da_df = da_df[['Name', 'Year', 'Month', 'Area (metres squared)']]
 
-    return
+    # Rename the 'Year' and 'Month' columns to 'Date'
+    new_da_df['Date'] = pd.to_datetime(new_da_df[['Year', 'Month']].assign(day=1))
+    new_da_df = new_da_df[['Name', 'Date', 'Area (metres squared)']]
+
+    print(new_da_df)
+
+    return new_da_df
 
 def plot():
     plt.figure(figsize=(8, 6))
-    plt.scatter(dw_df['Date'], dw_df['Area (metres squared)'], s=40, c='red', label='Dynamic World')
-    plt.scatter(ndwi_df['Date'], ndwi_df['Area (metres squared)'], s=40, c='black', label='NDWI')
-    plt.scatter(da_df['Date'], da_df['Area (metres squared)'], s=40, c='blue', label='Deep Aqua')
+    plt.scatter(dw_df['Date'], dw_df['Area (metres squared)'], s=20, c='red', label='Dynamic World')
+    plt.scatter(ndwi_df['Date'], ndwi_df['Area (metres squared)'], s=20, c='black', label='NDWI')
+    plt.scatter(new_da_df['Date'], da_df['Area (metres squared)'], s=20, c='blue', label='Deep Aqua')
+    plt.xticks(rotation=90)
+    plt.gca().xaxis.set_major_locator(mdates.MonthLocator(interval=2))
+    plt.xticks(fontsize=8)
     plt.xlabel('Date')
     plt.ylabel('Area (m^2)')
     #plt.ylim(0, 1e8)
