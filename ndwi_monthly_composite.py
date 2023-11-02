@@ -15,10 +15,12 @@ endYear = 2023
 # Loop through each AOI.
 for aoi_name, roi in aoi_list.items():  # Iterate through dictionary items.
 
+    # Create an empty image collection to store monthly NDWI images
     ndwiMaskCollection = ee.ImageCollection([])
 
-    # Loop through each year and each month.
+    # Loop through each year
     for year in range(startYear, endYear + 1):
+        # Loop through each month
         for month in range(1, 13):
             # Define the start and end dates for the current month and year.
             startDate = ee.Date.fromYMD(year, month, 1)

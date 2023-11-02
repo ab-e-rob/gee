@@ -3,10 +3,10 @@ import os
 import calendar
 import matplotlib.pyplot as plt
 
-wetland_name = 'Vattenan'
+wetland_name = 'Falsterbo'
 
 # Locate csv file and load as a dataframe
-file_path = r'C:\Users\abro3569\PycharmProjects\gee\ndwi_area\\' + wetland_name + '.csv'
+file_path = r'C:\Users\abro3569\PycharmProjects\gee\dyn_w_area\\' + wetland_name + '.csv'
 
 df = pd.read_csv(file_path, delimiter=',', header=0)
 
@@ -39,12 +39,12 @@ plt.figure(figsize=(8, 6))
 plt.scatter(df['Date'], df['Area (metres squared)'], s=70)
 plt.xlabel('Date')
 plt.ylabel('Area (m^2)')
-plt.title(f'{wetland_name} Area from NDWI (2020-2023)')
+plt.title(f'{wetland_name} Area from Dynamic World (2020-2023)')
 
 # Disable scientific notation for the y-axis
 #plt.gca().get_yaxis().get_major_formatter().set_scientific(False)
 
-plt.savefig(r'C:\Users\abro3569\PycharmProjects\gee\ndwi_area\\' + wetland_name + '.png')
+plt.savefig(r'C:\Users\abro3569\PycharmProjects\gee\dyn_w_area\\' + wetland_name + '.png')
 
 plt.show()
 

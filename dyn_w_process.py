@@ -7,7 +7,7 @@ import csv
 wetland_name = 'Askoviken'
 
 # Folder containing the input raster files
-input_folder = r"Z:\ndwi\area\ndwi_int\ndwi_mask_" + wetland_name
+input_folder = r'D:\dynamic_world\dynamic_world_' + wetland_name
 
 print(input_folder)
 
@@ -24,7 +24,7 @@ for filename in os.listdir(input_folder):
 
         # Use a context manager to open the raster file
         with rasterio.open(raster_path) as src:
-            # Read the first band (index 0) instead of band 1
+            # Read the first band
             binary_array = src.read(1)
 
             # Make sure you read the transform inside the context manager
@@ -33,8 +33,8 @@ for filename in os.listdir(input_folder):
         # Get shapes (polygons)
         shapes = list(rasterio.features.shapes(binary_array, transform=transform))
 
-        # Extract polygons using a list comprehension
-        polygons = [shape(geom) for geom, value in shapes if value == 1]  # Filter by the desired value (e.g., 1)
+        # Extract polygons with values 0 and 3 using a list comprehension
+        polygons = [shape(geom) for geom, value in shapes if value in [0, 3]]
 
         # Dissolve the polygons into a single polygon and buffer it by 0 (no buffer)
         dissolved_polygon = MultiPolygon(polygons).buffer(0)
@@ -48,11 +48,11 @@ for filename in os.listdir(input_folder):
         # Reproject the GeoDataFrame to UTM (or your desired projected CRS)
         dissolved_gdf = dissolved_gdf.to_crs(utm_crs)
 
-        # Test save as shapefile
-        dissolved_gdf.to_file(f'{filename}_ndwi.shp')
-
         # Calculate the area in square meters (m²) in the projected CRS
         area_utm = dissolved_gdf.geometry.area.iloc[0]
+
+        # Test save as shapefile
+        dissolved_gdf.to_file(f'{filename}.shp')
 
         # Optionally, you can print the area for each raster
         print(f"{filename} Area (UTM): {area_utm} m²")
@@ -61,8 +61,7 @@ for filename in os.listdir(input_folder):
         results.append((filename, area_utm))
 
 
-
-output_csv = r'C:\Users\abro3569\PycharmProjects\gee\ndwi_area\\' + wetland_name + '.csv'
+output_csv = r'C:\Users\abro3569\PycharmProjects\gee\dyn_w_area\\' + wetland_name + '.csv'
 with open(output_csv, mode="w", newline="") as file:
     writer = csv.writer(file)
     writer.writerow(["Filename", "Area (metres squared)"])

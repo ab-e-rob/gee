@@ -4,7 +4,7 @@ import calendar
 
 def plot_open_water_percent():
     # Read the CSV file into a DataFrame
-    df = pd.read_csv('combined_results_edited.csv', delimiter=',', header=0)
+    df = pd.read_csv('results/combined_results_edited.csv', delimiter=',', header=0)
 
     # Set first row as index
     df = df.set_index(df.columns[0])
@@ -36,7 +36,7 @@ def plot_open_water_percent():
     return()
 
 def plot_mean():
-    df = pd.read_csv('mean_values.csv', delimiter=',', header=0)
+    df = pd.read_csv('results/mean_values.csv', delimiter=',', header=0)
     # Set first row as index
     df = df.set_index(df.columns[1])
     df = df.drop('Unnamed: 0', axis=1)
