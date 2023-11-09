@@ -4,7 +4,7 @@ from shapely.geometry import shape, MultiPolygon
 import geopandas as gpd
 import csv
 
-wetland_name = 'Lundakrabukten'
+wetland_name = 'Vattenan'
 
 # Folder containing the input raster files
 input_folder = r'D:\dynamic_world\dynamic_world_' + wetland_name

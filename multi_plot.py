@@ -2,7 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 
-wetland_name = 'Askoviken'
+wetland_name = 'Aloppkolen'
 
 # Locate csv file and load as a dataframe
 dynamic_world = r'C:\Users\abro3569\PycharmProjects\gee\dyn_w_area\\' + wetland_name + '.csv'
@@ -97,16 +97,16 @@ def read_deepaqua():
     return new_da_df
 
 def plot():
-    plt.figure(figsize=(8, 6))
+    plt.figure(figsize=(12, 8))
     plt.scatter(dw_df['Date'], dw_df['Area (metres squared)'], s=20, c='red', label='Dynamic World')
     plt.scatter(ndwi_df['Date'], ndwi_df['Area (metres squared)'], s=20, c='black', label='NDWI')
     plt.scatter(new_da_df['Date'], da_df['Area (metres squared)'], s=20, c='blue', label='Deep Aqua')
     plt.xticks(rotation=90)
     plt.gca().xaxis.set_major_locator(mdates.MonthLocator(interval=2))
-    plt.xticks(fontsize=8)
+    plt.xticks(fontsize=9)
     plt.xlabel('Date')
-    plt.ylabel('Area (m^2)')
-    #plt.ylim(0, 1e8)
+    plt.ylabel(r'Area ($m^2$)')
+    #plt.ylim(1.4e8, 3e8)
     plt.legend()
     plt.title(f'{wetland_name} Area (2020-2023)')
 

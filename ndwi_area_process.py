@@ -49,7 +49,7 @@ for filename in os.listdir(input_folder):
         dissolved_gdf = dissolved_gdf.to_crs(utm_crs)
 
         # Test save as shapefile
-        dissolved_gdf.to_file(f'{filename}_ndwi.shp')
+        dissolved_gdf.to_file(f'test_shps\\ndwi\\{filename}_ndwi.shp')
 
         # Calculate the area in square meters (m²) in the projected CRS
         area_utm = dissolved_gdf.geometry.area.iloc[0]
