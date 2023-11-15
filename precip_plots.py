@@ -2,12 +2,39 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 
-wetland_name = 'Gammelstadsviken'
+wetland_name = 'Komosse'
 
 # Locate csv file and load as a dataframe
 dynamic_world = r'C:\Users\abro3569\PycharmProjects\gee\dyn_w_area\\' + wetland_name + '.csv'
 ndwi = r'C:\Users\abro3569\PycharmProjects\gee\ndwi_area\\' + wetland_name + '.csv'
 deep_aqua = r'C:\Users\abro3569\PycharmProjects\deep-wetlands-new\data\results\big-2020_' + wetland_name + '_water_estimates_NEW_POLYGONISED.csv'
+precip = r'C:\Users\abro3569\Documents\ArcGIS\Projects\seasonal_var\monthly_precip_all_wetlands.csv'
+
+def read_precip():
+    global precip_df
+
+    precip_df = pd.read_csv(precip, delimiter=',', header=0)
+
+    # Rename StdTime column to 'Date'
+    precip_df = precip_df.rename(columns={'StdTime': 'Date'})
+
+    # Convert Date column (format MM/DD/YYYY) to datetime format (YYYY-MM-DD)
+    precip_df['Date'] = pd.to_datetime(precip_df['Date'], format='%m/%d/%Y')
+
+    # Reset the time so that it is the first of every month
+    precip_df['Date'] = precip_df['Date'].dt.strftime('%Y-%m-01')
+
+    # Convert Date column back to datetime format
+    precip_df['Date'] = pd.to_datetime(precip_df['Date'], format='%Y-%m-%d')
+
+    # Extract column name based on which wetland is being plotted
+    precip_df = precip_df[['Date', wetland_name]]
+
+    # Display the DataFrame
+    print(precip_df)
+
+    return
+
 
 def read_dynamic_world():
     global dw_df
@@ -35,7 +62,7 @@ def read_dynamic_world():
     dw_df['Date'] = pd.to_datetime(dw_df['Date'], format='%m/%Y')
 
     # Display the DataFrame
-    #print(dw_df)
+    print(dw_df)
 
     return
 
@@ -97,29 +124,42 @@ def read_deepaqua():
     return new_da_df
 
 def plot():
-    plt.figure(figsize=(12, 8))
-    plt.scatter(dw_df['Date'], dw_df['Area (metres squared)'], s=20, c='red', label='Dynamic World')
-    plt.scatter(ndwi_df['Date'], ndwi_df['Area (metres squared)'], s=20, c='black', label='NDWI')
-    plt.scatter(new_da_df['Date'], da_df['Area (metres squared)'], s=20, c='blue', label='Deep Aqua')
-    plt.xticks(rotation=90)
-    plt.gca().xaxis.set_major_locator(mdates.MonthLocator(interval=2))
-    plt.xticks(fontsize=9)
-    plt.xlabel('Date')
-    plt.ylabel(r'Area ($m^2$)')
-    #plt.ylim(1.4e8, 3e8)
-    plt.legend()
+    # Create a figure with a size of 12x8 inches
+    fig, ax1 = plt.subplots(figsize=(12, 8))
+
+    # Scatter plots for Dynamic World, NDWI, and Deep Aqua
+    ax1.scatter(dw_df['Date'], dw_df['Area (metres squared)'], s=20, c='red', label='Dynamic World')
+    ax1.scatter(ndwi_df['Date'], ndwi_df['Area (metres squared)'], s=20, c='black', label='NDWI')
+    ax1.scatter(new_da_df['Date'], new_da_df['Area (metres squared)'], s=20, c='blue', label='Deep Aqua')
+
+    # Create a secondary y-axis for precipitation
+    ax2 = ax1.twinx()
+    ax2.plot(precip_df['Date'], precip_df[wetland_name], color='green', label='Precipitation (mm)')
+    ax2.set_ylabel('Precipitation (mm)')
+    ax2.tick_params(axis='y')
+    ax2.legend(loc='upper left')
+
+    # Set x-axis ticks and labels
+    ax1.xaxis.set_major_locator(mdates.MonthLocator(interval=2))
+    ax1.xaxis.set_major_formatter(mdates.DateFormatter('%m-%Y'))
+    ax1.set_xticklabels(ax1.get_xticklabels(), rotation=90, fontsize=9)
+
+    # Set axis labels and plot title
+    ax1.set_xlabel('Date')
+    ax1.set_ylabel(r'Area ($m^2$)')
+    ax1.legend()
     plt.title(f'{wetland_name} Area (2020-2023)')
 
     # Save and show the plot
-    plt.savefig(r'C:\Users\abro3569\PycharmProjects\gee\combined_plots\\' + wetland_name + '_combined_plot.png')
+    plt.tight_layout()
+    plt.savefig(f'C:\\Users\\abro3569\\PycharmProjects\\gee\\precip_plots\\{wetland_name}_combined_precip.png')
     plt.show()
 
-    return
 
-
-
+read_precip()
 read_dynamic_world()
 read_ndwi()
 read_deepaqua()
 plot()
+
 

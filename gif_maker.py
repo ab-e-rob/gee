@@ -2,13 +2,13 @@ from PIL import Image
 import os
 
 wetland_name = 'Askoviken'
-gif_type = 'ndwi'
+model_type = 'da'
 
 # Input folder containing PNG images
-input_folder = r"C:\Users\abro3569\Documents\PhD\Year_1\paper_1_imgs\\" + wetland_name + "_" + gif_type + "_gif"
+input_folder = r"C:\Users\abro3569\Documents\PhD\Year_1\paper_1_imgs\\" + wetland_name + "_" + model_type + "_gif"
 
 # Output GIF file
-output_gif = r"C:\Users\abro3569\Documents\PhD\Year_1\paper_1_imgs\\" + wetland_name + "_" + gif_type + ".gif"
+output_gif = r"C:\Users\abro3569\Documents\PhD\Year_1\paper_1_imgs\\" + wetland_name + "_" + model_type + ".gif"
 
 # List all PNG files in the input folder
 png_files = [f for f in os.listdir(input_folder) if f.endswith(".png")]
@@ -37,6 +37,6 @@ for png_file in sorted_png_files:
     images.append(image)
 
 # Save the list of images as a GIF
-images[0].save(output_gif, save_all=True, append_images=images[1:], duration=400, loop=0)
+images[0].save(output_gif, save_all=True, append_images=images[1:], duration=500, loop=0)
 
 print(f"GIF created and saved as {output_gif}")
