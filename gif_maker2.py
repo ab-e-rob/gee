@@ -53,8 +53,8 @@ for i, shapefile in enumerate(shapefiles):
 
     # Extract year and month from the shapefile name
     parts = os.path.splitext(shapefile)[0].split('_')
-    year = parts[-2]
-    month = parts[-1]
+    year = parts[-3]
+    month = parts[-2]
 
     # Read the shapefile using geopandas
     gdf = gpd.read_file(r'C:\Users\abro3569\PycharmProjects\gee\test_shps\\' + model_type + '\\' + shapefile)

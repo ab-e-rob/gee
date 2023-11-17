@@ -1,15 +1,6 @@
 import pandas as pd
-import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
 
-wetland_name = 'Hjalstaviken'
-
-# Locate csv file and load as a dataframe
-dynamic_world = r'C:\Users\abro3569\PycharmProjects\gee\dyn_w_area\\' + wetland_name + '.csv'
-ndwi = r'C:\Users\abro3569\PycharmProjects\gee\ndwi_area\\' + wetland_name + '.csv'
-deep_aqua = r'C:\Users\abro3569\PycharmProjects\deep-wetlands-new\data\results\big-2020_' + wetland_name + '_water_estimates_NEW_POLYGONISED.csv'
-
-def read_dynamic_world():
+def read_dynamic_world(wetland_name, dynamic_world):
     global dw_df
 
     dw_df = pd.read_csv(dynamic_world, delimiter=',', header=0)
@@ -35,11 +26,11 @@ def read_dynamic_world():
     dw_df['Date'] = pd.to_datetime(dw_df['Date'], format='%m/%Y')
 
     # Display the DataFrame
-    #print(dw_df)
+    print(f'Dynamic world:\n{dw_df.head()}')
 
     return
 
-def read_ndwi():
+def read_ndwi(wetland_name, ndwi):
     global ndwi_df
 
     ndwi_df = pd.read_csv(ndwi, delimiter=',', header=0)
@@ -65,11 +56,11 @@ def read_ndwi():
     ndwi_df['Date'] = pd.to_datetime(ndwi_df['Date'], format='%m/%Y')
 
     # Display the DataFrame
-    #print(ndwi_df)
+    print(f'NDWI:\n{ndwi_df.head()}')
 
     return
 
-def read_deepaqua():
+def read_deepaqua(wetland_name, deep_aqua):
     global da_df
     global new_da_df
 
@@ -92,34 +83,6 @@ def read_deepaqua():
     new_da_df['Date'] = pd.to_datetime(new_da_df[['Year', 'Month']].assign(day=1))
     new_da_df = new_da_df[['Name', 'Date', 'Area (metres squared)']]
 
-    print(new_da_df)
+    print(f'Deep Aqua:\n{new_da_df.head()}')
 
     return new_da_df
-
-def plot():
-    plt.figure(figsize=(12, 8))
-    plt.scatter(dw_df['Date'], dw_df['Area (metres squared)'], s=20, c='red', label='Dynamic World')
-    plt.scatter(ndwi_df['Date'], ndwi_df['Area (metres squared)'], s=20, c='black', label='NDWI')
-    plt.scatter(new_da_df['Date'], da_df['Area (metres squared)'], s=20, c='blue', label='Deep Aqua')
-    plt.xticks(rotation=90)
-    plt.gca().xaxis.set_major_locator(mdates.MonthLocator(interval=2))
-    plt.xticks(fontsize=9)
-    plt.xlabel('Date')
-    plt.ylabel(r'Area ($m^2$)')
-    #plt.ylim(1.4e8, 3e8)
-    plt.legend()
-    plt.title(f'{wetland_name} Area (2020-2023)')
-
-    # Save and show the plot
-    plt.savefig(r'C:\Users\abro3569\PycharmProjects\gee\combined_plots\\' + wetland_name + '_combined_plot.png')
-    plt.show()
-
-    return
-
-
-
-read_dynamic_world()
-read_ndwi()
-read_deepaqua()
-plot()
-
