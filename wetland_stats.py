@@ -1,12 +1,16 @@
 import pandas as pd
+
+
+
 from utils import read_model_results
 
 wetland_names = ['Aloppkolen', 'Annsjon', 'Askoviken', 'Asnen', 'Eman', 'Farnebofjarden',
                  'Fyllean', 'Gammelstadsviken', 'Getapulien', 'Hjalstaviken', 'Kallgate',
-                 'Komosse', 'Laidaure', 'Maanavuoma', 'Nittalven', 'Oldflan', 'Osten',
-                 'Persofjarden', 'Storremosse', 'Takern', 'Tarnsjon', 'Tysoarna']
+                 'Komosse', 'Koppangen','Laidaure', 'Mellerston','Maanavuoma', 'Nittalven', 'Oldflan', 'Osten',
+                 'Persofjarden','Skalderviken', 'Storremosse', 'Takern', 'Tarnsjon', 'Tavvovouma', 'Tysoarna','Vasikkavouma']
 
-def calc_range(df, dataset_name, wetland_name):
+
+def calc_range(df, model_name, wetland_name):
     # Create a new dataframe to store the results
     range_df = pd.DataFrame(columns=['Dataset', 'Name', 'Year', 'Range'])
 
@@ -21,11 +25,13 @@ def calc_range(df, dataset_name, wetland_name):
             area_range = year_df['Area (metres squared)'].max() - year_df['Area (metres squared)'].min()
 
             # Store the results in the dataframe
-            range_df = pd.concat([range_df, pd.DataFrame({'Dataset': [dataset_name], 'Name': [wetland_name], 'Year': [year], 'Range': [area_range]})], ignore_index=True)
+            range_df = pd.concat([range_df, pd.DataFrame(
+                {'Dataset': [model_name], 'Name': [wetland_name], 'Year': [year], 'Range': [area_range]})],
+                                 ignore_index=True)
 
     return range_df
 
-def calc_max_min_month(df, dataset_name, wetland_name):
+def calc_max_min_month(df, model_name, wetland_name):
     # Create a new dataframe to store the results
     month_range_df = pd.DataFrame(columns=['Dataset', 'Name', 'Year', 'Max_Month', 'Min_Month'])
 
@@ -36,13 +42,13 @@ def calc_max_min_month(df, dataset_name, wetland_name):
 
         # Check if there is data for the current year
         if not year_df.empty:
-            # Find the maximum and minimum month for the current year
-            max_month = year_df['Date'].dt.month.max()
-            min_month = year_df['Date'].dt.month.min()
+            # Find the maximum and minimum month based on the 'Area' column
+            max_month = year_df.loc[year_df['Area (metres squared)'].idxmax()]['Date'].month
+            min_month = year_df.loc[year_df['Area (metres squared)'].idxmin()]['Date'].month
 
             # Store the results in the dataframe
             month_range_df = pd.concat([month_range_df, pd.DataFrame({
-                'Dataset': [dataset_name],
+                'Dataset': [model_name],
                 'Name': [wetland_name],
                 'Year': [year],
                 'Max_Month': [max_month],
@@ -51,7 +57,8 @@ def calc_max_min_month(df, dataset_name, wetland_name):
 
     return month_range_df
 
-def calc_mean_monthly_area(df, dataset_name, wetland_name):
+
+def calc_mean_monthly_area(df, model_name, wetland_name):
     # Create a new dataframe to store the results
     mean_monthly_area_df = pd.DataFrame(columns=['Dataset', 'Name', 'Year', 'Month', 'Mean_Area'])
 
@@ -70,7 +77,7 @@ def calc_mean_monthly_area(df, dataset_name, wetland_name):
 
             # Store the results in the dataframe
             mean_monthly_area_df = pd.concat([mean_monthly_area_df, pd.DataFrame({
-                'Dataset': [dataset_name],
+                'Dataset': [model_name],
                 'Name': [wetland_name],
                 'Year': [2020],  # Using a placeholder year as the calculation is across multiple years
                 'Month': [month],
@@ -79,10 +86,28 @@ def calc_mean_monthly_area(df, dataset_name, wetland_name):
 
     return mean_monthly_area_df
 
+def calc_avg_area(df, model_name, wetland_name):
+    # Create a new dataframe to store the results
+    avg_area_df = pd.DataFrame(columns=['Dataset', 'Name', 'Avg_Area'])
+
+    # Calculate the average area for the entire dataset
+    avg_area = df['Area (metres squared)'].mean()
+
+    # Store the results in the dataframe
+    avg_area_df = pd.concat([avg_area_df, pd.DataFrame({
+        'Dataset': [model_name],
+        'Name': [wetland_name],
+        'Avg_Area': [avg_area]
+    })], ignore_index=True)
+
+    return avg_area_df
+
+
 # Initialize empty dataframes to store combined results
 combined_range = pd.DataFrame(columns=['Dataset', 'Name', 'Year', 'Range'])
 combined_month_range = pd.DataFrame(columns=['Dataset', 'Name', 'Year', 'Max_Month', 'Min_Month'])
 combined_mean_monthly_area = pd.DataFrame(columns=['Dataset', 'Name', 'Year', 'Month', 'Mean_Area'])
+combined_avg_area = pd.DataFrame(columns=['Dataset', 'Name', 'Avg_Area'])  # New dataframe for average area
 
 for wetland_name in wetland_names:
     # Locate csv files and load as dataframes
@@ -118,7 +143,8 @@ for wetland_name in wetland_names:
     da_month_range = calc_max_min_month(da_df, 'Deep Aqua', wetland_name)
 
     # Combine the results
-    combined_month_range = pd.concat([combined_month_range, dw_month_range, ndwi_month_range, da_month_range], ignore_index=True)
+    combined_month_range = pd.concat([combined_month_range, dw_month_range, ndwi_month_range, da_month_range],
+                                     ignore_index=True)
 
     # Calculate the mean monthly area for each dataset
     dw_mean_monthly_area = calc_mean_monthly_area(dw_df, 'Dynamic World', wetland_name)
@@ -126,9 +152,20 @@ for wetland_name in wetland_names:
     da_mean_monthly_area = calc_mean_monthly_area(da_df, 'Deep Aqua', wetland_name)
 
     # Combine the results
-    combined_mean_monthly_area = pd.concat([combined_mean_monthly_area, dw_mean_monthly_area, ndwi_mean_monthly_area, da_mean_monthly_area], ignore_index=True)
+    combined_mean_monthly_area = pd.concat(
+        [combined_mean_monthly_area, dw_mean_monthly_area, ndwi_mean_monthly_area, da_mean_monthly_area],
+        ignore_index=True)
+
+    # Calculate the average area for each dataset
+    dw_avg_area = calc_avg_area(dw_df, 'Dynamic World', wetland_name)
+    ndwi_avg_area = calc_avg_area(ndwi_df, 'NDWI', wetland_name)
+    da_avg_area = calc_avg_area(da_df, 'Deep Aqua', wetland_name)
+
+    # Combine the results
+    combined_avg_area = pd.concat([combined_avg_area, dw_avg_area, ndwi_avg_area, da_avg_area], ignore_index=True)
 
 # Save the combined results to a CSV file
 combined_range.to_csv(r'C:\Users\abro3569\PycharmProjects\gee\stats\yearly_range_combined.csv', index=False)
 combined_month_range.to_csv(r'C:\Users\abro3569\PycharmProjects\gee\stats\min_max_months_combined.csv', index=False)
 combined_mean_monthly_area.to_csv(r'C:\Users\abro3569\PycharmProjects\gee\stats\mean_monthly_area_combined.csv', index=False)
+combined_avg_area.to_csv(r'C:\Users\abro3569\PycharmProjects\gee\stats\avg_area_combined.csv', index=False)
