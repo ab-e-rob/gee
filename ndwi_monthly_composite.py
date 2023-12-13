@@ -6,7 +6,12 @@ from utils import get_aoi
 # Initialize Earth Engine
 ee.Initialize()
 
-aoi_list = get_aoi.get_all_aois()
+# uncomment if wanting to process all
+#aoi_list = get_aoi.get_all_aois()
+
+
+# add name in for only one site
+aoi_list = get_aoi.get_area_of_interest('Kvismaren')
 
 # Define the years for which you want to obtain composites.
 startYear = 2020

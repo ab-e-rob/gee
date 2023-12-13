@@ -2,7 +2,6 @@ import ee
 
 ee.Initialize()
 
-
 def get_area_of_interest(area_name):
     areas_of_interest = {
         'Aloppkolen': ee.Geometry.Polygon(
@@ -207,8 +206,8 @@ def get_area_of_interest(area_name):
             [[[15.18679456755876, 62.534186181617144], [15.586791537164371, 62.534186181617144],
               [15.586791537164371, 62.64227218243379], [15.18679456755876, 62.64227218243379]]]),
     }
-
-    return areas_of_interest[area_name]
+    # Use get method to handle cases where area_name is not in the dictionary
+    return {area_name: areas_of_interest.get(area_name, None)}
 
 def get_all_aois():
     areas_of_interest = {

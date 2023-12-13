@@ -2,8 +2,9 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import seaborn as sns
+import statsmodels.api as sm
 
-wetland_name = 'Koppangen'
+wetland_name = 'Morrumsan'
 
 # Locate csv file and load as a dataframe
 dynamic_world = r'C:\Users\abro3569\PycharmProjects\gee\dyn_w_area\\' + wetland_name + '.csv'
@@ -98,12 +99,18 @@ def read_deepaqua():
     return new_da_df
 
 def plot():
+    # Assuming dw_df, ndwi_df, and new_da_df are DataFrames containing your data
+
+    # Convert date strings to datetime objects if they are not already
+    dw_df['Date'] = pd.to_datetime(dw_df['Date'])
+    ndwi_df['Date'] = pd.to_datetime(ndwi_df['Date'])
+    new_da_df['Date'] = pd.to_datetime(new_da_df['Date'])
 
     dw_df['Area (metres squared)'] = dw_df['Area (metres squared)'] / 10000
     ndwi_df['Area (metres squared)'] = ndwi_df['Area (metres squared)'] / 10000
     new_da_df['Area (metres squared)'] = new_da_df['Area (metres squared)'] / 10000
-    # set font to Tahoma
 
+    # set font to Tahoma
     plt.rcParams['font.sans-serif'] = "Tahoma"
     # add main black border around plot AND CHANGE THICKNESS
     plt.rcParams['axes.linewidth'] = 2
@@ -112,15 +119,29 @@ def plot():
     plt.rcParams['grid.color'] = 'black'
     plt.rcParams['grid.linewidth'] = 0.5
 
-
     plt.figure(figsize=(26, 16))
     # move the plot up
     plt.subplots_adjust(top=0.90, bottom=0.2)
 
     # Use Seaborn scatterplot instead of plt.scatter
-    sns.scatterplot(x='Date', y='Area (metres squared)', data=dw_df, s=300, color='#1b9e77', edgecolor='black', label='Dynamic World')
-    sns.scatterplot(x='Date', y='Area (metres squared)', data=ndwi_df, s=300, color='#d95f02', edgecolor='black', label='NDWI')
-    sns.scatterplot(x='Date', y='Area (metres squared)', data=new_da_df, s=300, color='#7570b3', edgecolor='black', label='Deep Aqua')
+    sns.scatterplot(x='Date', y='Area (metres squared)', data=dw_df, s=300, color='#1b9e77', edgecolor='black',
+                    label='Dynamic World')
+    sns.scatterplot(x='Date', y='Area (metres squared)', data=ndwi_df, s=300, color='#d95f02', edgecolor='black',
+                    label='NDWI')
+    sns.scatterplot(x='Date', y='Area (metres squared)', data=new_da_df, s=300, color='#7570b3', edgecolor='black',
+                    label='Deep Aqua')
+
+    # Convert dates to numbers
+    x_values = mdates.date2num(new_da_df['Date'])
+
+    # Fit a loess regression line to the Deep Aqua data
+    lowess_smoothed = sm.nonparametric.lowess(new_da_df['Area (metres squared)'], x_values, frac=0.2)
+
+    # Convert the x-values back to dates for plotting
+    x_dates = mdates.num2date(lowess_smoothed[:, 0])
+
+    # Plot the loess regression line
+    plt.plot(x_dates, lowess_smoothed[:, 1], color='#7570b3', linewidth=3)
 
     plt.xticks(rotation=90)
     # plot as Jan-22
@@ -128,13 +149,11 @@ def plot():
     plt.gca().xaxis.set_major_locator(mdates.MonthLocator(interval=2))
     plt.xticks(fontsize=40)
     plt.yticks(fontsize=40)
-    #plt.xlabel('Date')
+
+    #plt.ylim(-100, 3000)
     plt.ylabel(r'Area (ha)', fontsize=40)
-    #plt.ylim(-100, 7000)
-    # plot legend top right
     plt.legend(loc='upper right', fontsize=40, facecolor='#E3E5E2')
     plt.gca().set_facecolor('#E3E5E2')
-    #plt.title(f'{wetland_name} Area (2020-2023)')
 
     # Save and show the plot
     plt.savefig(r'C:\Users\abro3569\PycharmProjects\gee\combined_plots\\' + wetland_name + '_combined_plot.svg',

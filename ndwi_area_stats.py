@@ -3,7 +3,7 @@ import os
 import calendar
 import matplotlib.pyplot as plt
 
-wetland_name = 'Vattenan'
+wetland_name = 'Kvismaren'
 
 # Locate csv file and load as a dataframe
 file_path = r'C:\Users\abro3569\PycharmProjects\gee\ndwi_area\\' + wetland_name + '.csv'
